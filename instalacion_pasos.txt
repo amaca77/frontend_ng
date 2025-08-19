@@ -1,0 +1,4 @@
+npm install -g @angular/cli@18.2.12
+
+npx @angular/cli@18 new frontend_ng --routing --style=scss --strict
+
