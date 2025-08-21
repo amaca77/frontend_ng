@@ -1,4 +1,4 @@
 export const environment = {
-  production: false,
-  apiUrl: ''  // Tu URL de backend actual
+  production: true,
+  apiUrl: 'http://3.130.97.174/api'  // Tu URL de backend actual
 };
