@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, tap, catchError, of } from 'rxjs';
+import { Observable, tap, catchError, of, map } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { Product } from '../../../shared/types/product.interface';
 
@@ -21,23 +21,40 @@ export class ProductsService {
    * Obtener todos los productos desde la API
    * Endpoint: GET /api/products/
    */
-  getProducts(): Observable<Product[]> {
-    this.loading.set(true);
-    this.error.set(null);
-    
-    return this.apiService.get<Product[]>('products/')
-      .pipe(
-        tap(() => {
-          this.loading.set(false);
-        }),
-        catchError((error) => {
-          this.loading.set(false);
-          this.error.set('Error al cargar productos desde el servidor');
-          console.error('Error getting products:', error);
-          throw error; // Re-throw para que el componente pueda manejarlo
-        })
-      );
-  }
+ getProducts(): Observable<any> {
+  this.loading.set(true);
+  this.error.set(null);
+  
+  return this.apiService.get<any>('communities/550e8400-e29b-41d4-a716-446655440001/listings/featured', {
+    page: 1,
+    limit: 15,
+    strategy: 'featured_first'
+  }).pipe(
+    map((response: any) => {
+      // Mapear la nueva estructura a la anterior
+      return response.items.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        description: item.short_description,
+        price: parseFloat(item.price),
+        list_price: parseFloat(item.list_price),
+        image_url: item.primary_image?.image_url ? 
+    `https://cdn.jatic.com.ar${item.primary_image.image_url}` : 
+    'assets/images/placeholder.jpg',
+        category: item.category?.name,
+        stock: item.stock_quantity,
+        // Agregar otros campos que necesites
+      }));
+    }),
+    tap(() => this.loading.set(false)),
+    catchError((error) => {
+      this.loading.set(false);
+      this.error.set('Error al cargar productos desde el servidor');
+      console.error('Error getting products:', error);
+      throw error;
+    })
+  );
+}
 
   /**
    * Obtener un producto por ID desde la API

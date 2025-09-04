@@ -24,13 +24,13 @@ import { Product } from '../../../../shared/types/product.interface';
         <img 
           mat-card-image 
           [src]="product.image_url" 
-          [alt]="product.name"
+          [alt]="product.title"
           class="product-image"
           (error)="onImageError($event)">
       </div>
       
       <mat-card-header>
-        <mat-card-title class="product-title">{{ product.name }}</mat-card-title>
+        <mat-card-title class="product-title">{{ product.title }}</mat-card-title>
         <mat-card-subtitle class="product-price">{{'$' + product.price }}</mat-card-subtitle>
       </mat-card-header>
       

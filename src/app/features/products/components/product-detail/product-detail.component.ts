@@ -51,7 +51,7 @@ import { Product } from '../../../../shared/types/product.interface';
             <div class="product-image-section">
               <img 
                 [src]="product()!.image_url" 
-                [alt]="product()!.name"
+                [alt]="product()!.title"
                 class="product-image"
                 (error)="onImageError($event)">
             </div>
@@ -59,7 +59,7 @@ import { Product } from '../../../../shared/types/product.interface';
             <div class="product-info">
               <mat-card-header>
                 <mat-card-title class="product-title">
-                  {{ product()!.name }}
+                  {{ product()!.title }}
                 </mat-card-title>
                 <mat-card-subtitle class="product-price">
                   {{ '$'+product()!.price }}
