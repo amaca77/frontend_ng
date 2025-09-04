@@ -60,23 +60,50 @@ export class ProductsService {
    * Obtener un producto por ID desde la API
    * Endpoint: GET /api/products/{id}/
    */
-  getProduct(id: number): Observable<Product> {
-    this.loading.set(true);
-    this.error.set(null);
-    
-    return this.apiService.get<Product>(`products/${id}/`)
-      .pipe(
-        tap(() => {
-          this.loading.set(false);
-        }),
-        catchError((error) => {
-          this.loading.set(false);
-          this.error.set('Error al cargar el producto');
-          console.error('Error getting product:', error);
-          throw error; // Re-throw para que el componente pueda manejarlo
-        })
-      );
-  }
+ getProduct(id: string): Observable<any> {
+  this.loading.set(true);
+  this.error.set(null);
+  
+  return this.apiService.get<any>(`communities/550e8400-e29b-41d4-a716-446655440001/listings/${id}`)
+    .pipe(
+      map((response: any) => {
+        // Mapear la nueva estructura
+        return {
+          id: response.id,
+          title: response.title,
+          description: response.short_description,
+          long_description: response.long_description,
+          price: parseFloat(response.price),
+          list_price: parseFloat(response.list_price),
+          stock: response.stock_quantity,
+          max_quantity: response.max_quantity_per_order,
+          category: response.category?.name,
+          advertiser: response.advertiser?.name,
+          created_at: response.created_at,
+          updated_at: response.updated_at,
+          // Imagen principal
+          image_url: response.images?.find((img: any) => img.is_primary)?.image_url 
+            ? `https://cdn.jatic.com.ar${response.images.find((img: any) => img.is_primary).image_url}`
+            : 'assets/images/placeholder.jpg',
+          // Todas las imágenes
+          images: response.images?.map((img: any) => ({
+            id: img.id,
+            url: `https://cdn.jatic.com.ar${img.image_url}`,
+            alt: img.alt_text,
+            is_primary: img.is_primary
+          })) || [],
+          delivery_methods: response.delivery_methods || []
+        };
+      }),
+      tap(() => this.loading.set(false)),
+      catchError((error) => {
+        this.loading.set(false);
+        this.error.set('Error al cargar el producto');
+        console.error('Error getting product:', error);
+        throw error;
+      })
+    );
+}
 
   /**
    * Crear un nuevo producto

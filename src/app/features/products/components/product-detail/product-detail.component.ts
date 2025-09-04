@@ -46,51 +46,29 @@ import { Product } from '../../../../shared/types/product.interface';
           <span>Producto cargado desde el servidor</span>
         </div>
         
-        <mat-card class="product-detail-card">
-          <div class="product-content">
-            <div class="product-image-section">
-              <img 
-                [src]="product()!.image_url" 
-                [alt]="product()!.title"
-                class="product-image"
-                (error)="onImageError($event)">
-            </div>
-            
-            <div class="product-info">
-              <mat-card-header>
-                <mat-card-title class="product-title">
-                  {{ product()!.title }}
-                </mat-card-title>
-                <mat-card-subtitle class="product-price">
-                  {{ '$'+product()!.price }}
-                </mat-card-subtitle>
-              </mat-card-header>
-              
-              <mat-card-content>
-                <p class="product-description">
-                  {{ product()!.description }}
-                </p>
-                
-                <div class="product-meta">
-                  <p><strong>Estado:</strong> {{ product()!.status | titlecase }}</p>
-                  <p><strong>ID:</strong> {{ product()!.id }}</p>
-                  <p><strong>Fecha de creación:</strong> {{ product()!.created_at | date:'medium' }}</p>
-                </div>
-              </mat-card-content>
-              
-              <mat-card-actions>
-                <button mat-raised-button color="primary" class="add-to-cart-btn">
-                  <mat-icon>shopping_cart</mat-icon>
-                  Agregar al Carrito
-                </button>
-                <button mat-outlined-button (click)="goBack()">
-                  <mat-icon>arrow_back</mat-icon>
-                  Volver a Productos
-                </button>
-              </mat-card-actions>
-            </div>
+        <mat-card-content>
+          <p class="product-description">
+            {{ product()!.long_description || product()!.description }}
+          </p>
+          
+          <div class="product-meta">
+            <p><strong>Precio:</strong> {{ product()!.price }}</p>
+            <p><strong>Precio lista:</strong> {{ product()!.list_price }}</p>
+            <p><strong>Stock:</strong> {{ product()!.stock }}</p>
+            <p><strong>Máx. por pedido:</strong> {{ product()!.max_quantity }}</p>
+            <p><strong>Categoría:</strong> {{ product()!.category }}</p>
+            <p><strong>Vendedor:</strong> {{ product()!.advertiser }}</p>
           </div>
-        </mat-card>
+          
+          <!-- Galería de imágenes si hay múltiples -->
+@if (product()!.images && product()!.images!.length > 1) {
+  <div class="image-gallery">
+    @for (image of product()!.images!; track image.id) {
+      <img [src]="image.url" [alt]="image.alt" class="gallery-image">
+    }
+  </div>
+}
+        </mat-card-content>
       }
     </div>
   `,
@@ -215,25 +193,26 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   product = signal<Product | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
-  productId: number | null = null;
+  productId: string | null = null;
+
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    
-    if (id && !isNaN(Number(id))) {
-      this.productId = Number(id);
-      this.loadProduct(this.productId);
-    } else {
-      this.error.set('ID de producto no válido');
-    }
-  }
+      
+      if (id) {
+        this.productId = id;
+        this.loadProduct(this.productId);
+      } else {
+        this.error.set('ID de producto no válido');
+      }
+  } 
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  loadProduct(id: number) {
+  loadProduct(id: string) {
     this.loading.set(true);
     this.error.set(null);
 
