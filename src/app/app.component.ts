@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterModule } from '@angular/router';
+import { RouterOutlet, RouterModule, Router } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from './core/auth/auth.service';
+
 
 @Component({
   selector: 'app-root',
@@ -27,9 +29,13 @@ import { MatIconModule } from '@angular/material/icon';
         <button mat-icon-button>
           <mat-icon>shopping_cart</mat-icon>
         </button>
-        <button mat-icon-button>
+        <button mat-icon-button (click)="handleAccountClick()" 
+                [title]="isAuthenticated ? 'Cerrar sesión' : 'Iniciar sesión'">
           <mat-icon>account_circle</mat-icon>
         </button>
+        <span class="user-status">
+          {{ isAuthenticated ? 'Logueado' : 'No logueado' }}
+        </span>
       </mat-toolbar>
       
       <main class="app-content">
@@ -74,4 +80,51 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class AppComponent {
   title = 'mi-marketplace-app';
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  isAuthenticated = false;
+
+  ngOnInit() {
+    // ✅ Suscribirse a cambios de autenticación
+    this.authService.isAuthenticated$.subscribe(isAuth => {
+      this.isAuthenticated = isAuth;
+      if (isAuth) {
+        console.log('Usuario logueado - Roles:', this.authService.getUserRoles());
+      }
+    });
+    
+    // Verificación inicial
+    this.checkAuthStatus();
+  }
+
+  checkAuthStatus() {
+    this.isAuthenticated = this.authService.isAuthenticated();
+    // ✅ Mostrar roles en consola si está logueado
+    if (this.isAuthenticated) {
+      console.log('Usuario logueado - Roles:', this.authService.getUserRoles());
+    }
+  }
+
+  handleAccountClick() {
+    if (this.isAuthenticated) {
+      // ✅ Hacer logout si está logueado
+      const confirmLogout = confirm('¿Deseas cerrar sesión?');
+      if (confirmLogout) {
+        this.authService.logout();
+        // Actualizar estado después del logout
+        setTimeout(() => {
+          this.checkAuthStatus();
+        }, 100);
+      }
+    } else {
+      // Si no está logueado, ir al login
+      this.router.navigate(['/login']);
+    }
+  }
+
+
+
+  goToLogin() {
+    this.router.navigate(['/login']);
+  }
 }

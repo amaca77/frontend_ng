@@ -1,0 +1,14 @@
+{
+  "/api/*": {
+    "target": "https://s.jatic.com.ar",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/cdn/*": {
+    "target": "https://cdn.jatic.com.ar",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

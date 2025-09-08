@@ -189,7 +189,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
           );
         },
         error: (err) => {
-          this.error.set('No se pudo conectar al servidor en localhost:8000');
+          this.error.set('No se pudo conectar al servidor en localhost:8000 ...');
           this.loading.set(false);
           
           console.error('❌ Error conectando con API:', err);
