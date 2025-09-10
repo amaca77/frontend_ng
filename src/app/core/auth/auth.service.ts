@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { OAuthService } from 'angular-oauth2-oidc';
-import { BehaviorSubject } from 'rxjs';
+import { OAuthService, OAuthEvent  } from 'angular-oauth2-oidc';
+import { BehaviorSubject , filter } from 'rxjs';
 import { authConfig } from './auth.config';
 
 @Injectable({
@@ -12,11 +12,38 @@ export class AuthService {
 
   constructor(private oauthService: OAuthService) {
     this.configureOAuth();
+    this.setupEventListeners();
   }
 
   private configureOAuth(): void {
     this.oauthService.configure(authConfig);
-    this.oauthService.loadDiscoveryDocumentAndTryLogin();
+    
+    // ✅ Configurar para usar sessionStorage explícitamente
+    this.oauthService.setStorage(sessionStorage);
+    
+    this.oauthService.loadDiscoveryDocumentAndTryLogin().then(() => {
+      // ✅ Configurar refresh automático después de cargar
+      this.oauthService.setupAutomaticSilentRefresh();
+      this.updateAuthenticationState();
+    });
+  }
+
+    private setupEventListeners(): void {
+    // ✅ Escuchar eventos de OAuth para mejor gestión del estado
+    this.oauthService.events
+      .pipe(filter(e => ['token_received', 'token_refreshed', 'token_expires'].includes(e.type)))
+      .subscribe((event: OAuthEvent) => {
+        console.log('🔄 OAuth Event:', event.type);
+        this.updateAuthenticationState();
+      });
+
+    // ✅ Manejar errores de refresh
+    this.oauthService.events
+      .pipe(filter(e => e.type === 'silent_refresh_error'))
+      .subscribe(() => {
+        console.warn('⚠️ Error en silent refresh, redirigiendo al login');
+        this.login();
+      });
   }
 
   login(): void {
@@ -30,7 +57,12 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return this.oauthService.hasValidAccessToken();
+    const isAuth = this.oauthService.hasValidAccessToken();
+    console.log('🔍 AuthService.isAuthenticated():', {
+      hasValidAccessToken: isAuth,
+      accessToken: this.oauthService.getAccessToken() ? 'exists' : 'missing'
+    });
+    return isAuth;
   }
 
   getAccessToken(): string | null {
@@ -55,5 +87,16 @@ export class AuthService {
     const isAuth = this.isAuthenticated();
     this.isAuthenticatedSubject.next(isAuth);
     console.log('Estado de autenticación actualizado:', isAuth);
+  }
+
+  async refreshToken(): Promise<boolean> {
+    try {
+      await this.oauthService.silentRefresh();
+      this.updateAuthenticationState();
+      return true;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      return false;
+    }
   }
 }
