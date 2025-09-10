@@ -11,7 +11,12 @@
             if (parent && parent.postMessage) {
                 const hash = window.location.hash;
                 const search = window.location.search;
-                parent.postMessage(hash || search, window.location.origin);
+                
+                // ✅ Usar origin correcto de producción
+                const targetOrigin = 'https://cmadmin.jatic.com.ar';
+                parent.postMessage(hash || search, targetOrigin);
+                
+                console.log('Silent refresh: mensaje enviado a', targetOrigin);
             }
         } catch (e) {
             console.error('Error en silent refresh:', e);
