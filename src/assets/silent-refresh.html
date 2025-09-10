@@ -12,11 +12,10 @@
                 const hash = window.location.hash;
                 const search = window.location.search;
                 
-                // ✅ Usar origin correcto de producción
-                const targetOrigin = 'https://cmadmin.jatic.com.ar';
-                parent.postMessage(hash || search, targetOrigin);
+                // ✅ Usar "*" porque frontend y Keycloak están en dominios diferentes
+                parent.postMessage(hash || search, "*");
                 
-                console.log('Silent refresh: mensaje enviado a', targetOrigin);
+                console.log('Silent refresh: mensaje enviado con targetOrigin=*');
             }
         } catch (e) {
             console.error('Error en silent refresh:', e);
