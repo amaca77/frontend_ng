@@ -39,7 +39,16 @@ import { AuthService } from '../../../../core/auth/auth.service';
             <mat-icon>login</mat-icon>
             Iniciar Sesión con Keycloak
           </button>
-          
+
+          <button 
+            mat-raised-button 
+            color="primary" 
+            class="login-button"
+            (click)="register()">
+            <mat-icon>app_registration</mat-icon>
+            Crear cuenta nueva
+          </button>
+         
           <button 
             mat-button 
             (click)="goBack()">
@@ -101,12 +110,14 @@ export class LoginPageComponent {
   private router = inject(Router);
   constructor(private authService: AuthService) {}
 
-  login() {
-    // TODO: Implementar lógica de Keycloak
-    console.log('Login con Keycloak');
-    // Por ahora solo un placeholder
-    //alert('Función de login - próximo paso será conectar con Keycloak');
-    this.authService.login();
+login() {
+  console.log('=== INICIANDO LOGIN ===');
+  this.authService.login();
+}
+
+  register() {
+    console.log('Registro con Keycloak');
+    this.authService.register();
   }
 
   goBack() {

@@ -5,6 +5,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { ProductsService } from '../../services/products.service';
 import { Product } from '../../../../shared/types/product.interface';
@@ -17,7 +20,10 @@ import { Product } from '../../../../shared/types/product.interface';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule
   ],
   template: `
     <div class="container">
@@ -52,6 +58,7 @@ import { Product } from '../../../../shared/types/product.interface';
           </p>
           
           <div class="product-meta">
+            <p><strong>Id Producto:</strong> {{ product()!.id }}</p>
             <p><strong>Precio:</strong> {{ product()!.price }}</p>
             <p><strong>Precio lista:</strong> {{ product()!.list_price }}</p>
             <p><strong>Stock:</strong> {{ product()!.stock }}</p>
@@ -59,6 +66,37 @@ import { Product } from '../../../../shared/types/product.interface';
             <p><strong>Categoría:</strong> {{ product()!.category }}</p>
             <p><strong>Vendedor:</strong> {{ product()!.advertiser }}</p>
           </div>
+
+          <!-- Control de cantidad -->
+                <div class="quantity-section">
+                  <label class="quantity-label">Cantidad:</label>
+                  <div class="quantity-controls">
+                    <button 
+                      mat-icon-button 
+                      (click)="decreaseQuantity()"
+                      [disabled]="selectedQuantity() <= 1">
+                      <mat-icon>remove</mat-icon>
+                    </button>
+                    
+                    <mat-form-field appearance="outline" class="quantity-input">
+                      <input 
+                        matInput 
+                        type="number" 
+                        [(ngModel)]="selectedQuantityValue"
+                        [min]="1"
+                        [max]="getMaxQuantity()"
+                        (ngModelChange)="updateQuantity($event)">
+                    </mat-form-field>
+                    
+                    <button 
+                      mat-icon-button 
+                      (click)="increaseQuantity()"
+                      [disabled]="selectedQuantity() >= getMaxQuantity()">
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  </div>
+                  <p class="quantity-info">Máximo: {{ getMaxQuantity() }} unidades</p>
+                </div>
           
           <!-- Galería de imágenes si hay múltiples -->
 @if (product()!.images && product()!.images!.length > 1) {
@@ -69,6 +107,22 @@ import { Product } from '../../../../shared/types/product.interface';
   </div>
 }
         </mat-card-content>
+                      <mat-card-actions>
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  class="buy-now-btn"
+                  [disabled]="selectedQuantity() <= 0 || selectedQuantity() > getMaxQuantity()"
+                  (click)="buyNow()">
+                  <mat-icon>shopping_cart</mat-icon>
+                  Comprar ({{ selectedQuantity() }})
+                </button>
+                
+                <button mat-outlined-button (click)="goBack()">
+                  <mat-icon>arrow_back</mat-icon>
+                  Volver a Productos
+                </button>
+              </mat-card-actions>
       }
     </div>
   `,
@@ -77,6 +131,11 @@ import { Product } from '../../../../shared/types/product.interface';
       max-width: 1000px;
       margin: 0 auto;
       padding: 2rem 1rem;
+    }
+
+    .gallery-image {
+      width: 200px;
+      height: 200px;  
     }
     
     .success-indicator {
@@ -194,6 +253,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   loading = signal(false);
   error = signal<string | null>(null);
   productId: string | null = null;
+  selectedQuantity = signal(1);
+  selectedQuantityValue = 1;
 
 
   ngOnInit() {
@@ -246,5 +307,47 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   onImageError(event: any) {
     event.target.src = 'https://via.placeholder.com/500x400/e0e0e0/757575?text=Imagen+no+disponible';
+  }
+
+    increaseQuantity() {
+    const current = this.selectedQuantity();
+    const max = this.getMaxQuantity();
+    if (current < max) {
+      this.selectedQuantity.set(current + 1);
+      this.selectedQuantityValue = current + 1;
+    }
+  }
+
+  decreaseQuantity() {
+    const current = this.selectedQuantity();
+    if (current > 1) {
+      this.selectedQuantity.set(current - 1);
+      this.selectedQuantityValue = current - 1;
+    }
+  }
+
+  updateQuantity(value: number) {
+    const max = this.getMaxQuantity();
+    if (value >= 1 && value <= max) {
+      this.selectedQuantity.set(value);
+    } else if (value > max) {
+      this.selectedQuantity.set(max);
+      this.selectedQuantityValue = max;
+    } else {
+      this.selectedQuantity.set(1);
+      this.selectedQuantityValue = 1;
+    }
+  }
+
+  getMaxQuantity(): number {
+    return this.product()?.max_quantity || 10;
+  }
+
+  buyNow() {
+    const product = this.product();
+    const quantity = this.selectedQuantity();
+    
+    console.log(`🛒 Comprar: ${quantity} unidades de "${product?.id}"`);
+    alert(`Comprar ${quantity} unidades de ${product?.id}`);
   }
 }

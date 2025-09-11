@@ -3,6 +3,7 @@ import { OAuthService, OAuthEvent  } from 'angular-oauth2-oidc';
 import { BehaviorSubject , filter } from 'rxjs';
 import { authConfig } from './auth.config';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,36 +19,43 @@ export class AuthService {
   private configureOAuth(): void {
     this.oauthService.configure(authConfig);
     
-    // ✅ Configurar para usar sessionStorage explícitamente
+    // ✅ MANTENER: Storage explícito 
     this.oauthService.setStorage(sessionStorage);
     
     this.oauthService.loadDiscoveryDocumentAndTryLogin().then(() => {
-      // ✅ Configurar refresh automático después de cargar
       this.oauthService.setupAutomaticSilentRefresh();
+      
+      // ✅ MANTENER: Actualizar estado SIEMPRE (no solo si hay token)
+      console.log('OAuth configuration loaded, updating auth state...');
       this.updateAuthenticationState();
     });
   }
 
-    private setupEventListeners(): void {
-    // ✅ Escuchar eventos de OAuth para mejor gestión del estado
-    this.oauthService.events
-      .pipe(filter(e => ['token_received', 'token_refreshed', 'token_expires'].includes(e.type)))
-      .subscribe((event: OAuthEvent) => {
-        console.log('🔄 OAuth Event:', event.type);
-        this.updateAuthenticationState();
-      });
+  private setupEventListeners(): void {
+  // ✅ Escuchar eventos de OAuth para mejor gestión del estado
+  this.oauthService.events
+    .pipe(filter(e => ['token_received', 'token_refreshed', 'token_expires'].includes(e.type)))
+    .subscribe((event: OAuthEvent) => {
+      console.log('🔄 OAuth Event:', event.type);
+      this.updateAuthenticationState();
+    });
 
-    // ✅ Manejar errores de refresh
-    this.oauthService.events
-      .pipe(filter(e => e.type === 'silent_refresh_error'))
-      .subscribe(() => {
-        console.warn('⚠️ Error en silent refresh, redirigiendo al login');
-        this.login();
-      });
+  // ✅ Manejar errores de refresh
+  this.oauthService.events
+    .pipe(filter(e => e.type === 'silent_refresh_error'))
+    .subscribe(() => {
+      console.warn('⚠️ Error en silent refresh, redirigiendo al login');
+      this.login();
+    });
   }
 
   login(): void {
     this.oauthService.initLoginFlow();
+  }
+
+  register(): void {
+    const registerUrl = `${authConfig.issuer}/protocol/openid-connect/registrations?client_id=${authConfig.clientId}&redirect_uri=${authConfig.redirectUri}&response_type=code&scope=openid`;
+    window.location.href = registerUrl;
   }
 
   logout(): void {
