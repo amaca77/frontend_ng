@@ -23,6 +23,10 @@ export const routes: Routes = [
     path: 'auth/callback',
     component: AuthCallbackComponent
   },
+  {
+    path: 'checkout', 
+    loadComponent: () => import('./features/checkout/pages/checkout-page/checkout-page.component').then(c => c.CheckoutPageComponent)
+  },
   { 
     path: '**', 
     redirectTo: '/products' 

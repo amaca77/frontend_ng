@@ -11,6 +11,8 @@ import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { ProductsService } from '../../services/products.service';
 import { Product } from '../../../../shared/types/product.interface';
+import { CartService } from '../../../../core/services/cart.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-product-detail',
@@ -116,6 +118,16 @@ import { Product } from '../../../../shared/types/product.interface';
                   (click)="buyNow()">
                   <mat-icon>shopping_cart</mat-icon>
                   Comprar ({{ selectedQuantity() }})
+                </button>
+
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  class="addcart-now-btn"
+                  [disabled]="selectedQuantity() <= 0 || selectedQuantity() > getMaxQuantity()"
+                  (click)="addToCart()">
+                  <mat-icon>shopping_cart</mat-icon>
+                  Agregar al carrito ({{ selectedQuantity() }})
                 </button>
                 
                 <button mat-outlined-button (click)="goBack()">
@@ -248,6 +260,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private productsService = inject(ProductsService);
   private destroy$ = new Subject<void>();
+  private cartService = inject(CartService);
+  private snackBar = inject(MatSnackBar);
 
   product = signal<Product | null>(null);
   loading = signal(false);
@@ -343,11 +357,95 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     return this.product()?.max_quantity || 10;
   }
 
+  addToCart() {
+    const product = this.product();
+    const quantity = this.selectedQuantity();
+    
+    if (!product) {
+      this.snackBar.open('❌ Error: Producto no disponible', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    console.log(`🛒 Agregando ${quantity} unidades de "${product.title}" al carrito`);
+    
+    const success = this.cartService.addItem(
+      product.id,
+      quantity,
+      {
+        title: product.title,
+        price: product.price,
+        image_url: product.image_url || product.image
+      },
+      product.advertiser ?? '' // Asumiendo que viene el seller_id del producto, fallback a string vacío
+    );
+
+    if (success) {
+      this.snackBar.open(
+        `✅ ${quantity} unidades agregadas al carrito`, 
+        'Ver Carrito', 
+        { 
+          duration: 4000
+        }
+      ).onAction().subscribe(() => {
+        // Opcional: navegar al carrito
+        console.log('Ver carrito clicked');
+      });
+      
+      // Reset cantidad después de agregar
+      this.selectedQuantity.set(1);
+      
+    } else {
+      this.snackBar.open(
+        '❌ No se pueden mezclar productos de diferentes vendedores', 
+        'Cerrar',
+        { duration: 4000 }
+      );
+    }
+  }
+
+  /**
+   * Comprar ahora (agregar al carrito + ir a checkout)
+   */
   buyNow() {
     const product = this.product();
     const quantity = this.selectedQuantity();
     
-    console.log(`🛒 Comprar: ${quantity} unidades de "${product?.id}"`);
-    alert(`Comprar ${quantity} unidades de ${product?.id}`);
+    if (!product) {
+      this.snackBar.open('❌ Error: Producto no disponible', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    console.log(`🛒 Compra directa: ${quantity} unidades de "${product.title}"`);
+    
+    // Limpiar carrito anterior para compra directa
+    this.cartService.clearCart();
+    
+    const success = this.cartService.addItem(
+      product.id,
+      quantity,
+      {
+        title: product.title,
+        price: product.price,
+        image_url: product.image_url || product.image
+      },
+      product.advertiser ?? '' // seller_id, fallback a string vacío
+    );
+
+    if (success) {
+      // Navegar inmediatamente al checkout
+      this.router.navigate(['/checkout']);
+    } else {
+      this.snackBar.open('❌ Error agregando producto', 'Cerrar', { duration: 3000 });
+    }
   }
+
+  /**
+   * Obtener info del carrito para mostrar
+   */
+  getCartInfo() {
+    const totalItems = this.cartService.getTotalItems();
+    const totalPrice = this.cartService.getTotalPrice();
+    return { totalItems, totalPrice };
+  }
+  
 }

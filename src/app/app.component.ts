@@ -5,6 +5,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from './core/auth/auth.service';
+import { MiniCartComponent } from './shared/components/mini-cart/mini-cart.component';
 
 
 @Component({
@@ -16,7 +17,8 @@ import { AuthService } from './core/auth/auth.service';
     RouterModule,
     MatToolbarModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MiniCartComponent
   ],
   template: `
     <div class="app-container">
@@ -26,9 +28,8 @@ import { AuthService } from './core/auth/auth.service';
         <button mat-icon-button>
           <mat-icon>search</mat-icon>
         </button>
-        <button mat-icon-button>
-          <mat-icon>shopping_cart</mat-icon>
-        </button>
+        <span class="spacer"></span>
+        <app-mini-cart></app-mini-cart>
         <button mat-icon-button (click)="handleAccountClick()" 
                 [title]="isAuthenticated ? 'Cerrar sesión' : 'Iniciar sesión'">
           <mat-icon>account_circle</mat-icon>
@@ -76,6 +77,19 @@ import { AuthService } from './core/auth/auth.service';
       flex: 1;
       overflow-y: auto;
     }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .user-info {
+      margin-right: 1rem;
+      font-weight: 500;
+    }
+
+
   `]
 })
 export class AppComponent {
