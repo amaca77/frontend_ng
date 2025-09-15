@@ -12,6 +12,7 @@ export class CartService {
   // Signal para reactivity
   private cartSignal = signal<Cart | null>(null);
   
+  
   // Public readonly signal
   get cart() { 
     return this.cartSignal.asReadonly(); 
@@ -44,7 +45,8 @@ export class CartService {
           productData: {
             title: productData.title,
             price: productData.price,
-            image_url: productData.image_url || productData.image
+            image_url: productData.image_url || productData.image,
+            delivery_methods: productData.delivery_methods || [] 
           }
         }],
         created_at: new Date(),
@@ -144,7 +146,7 @@ export class CartService {
   /**
    * Obtener total en pesos
    */
-  getTotalPrice(): number {
+  getSubTotalPrice(): number {
     const cart = this.cartSignal();
     return cart ? cart.items.reduce((total, item) => 
       total + (item.quantity * item.productData.price), 0

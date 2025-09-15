@@ -7,7 +7,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { CartService } from '../../../../core/services/cart.service';
-import { Cart } from '../../../../shared/types/cart.interface';
+import { CheckoutService } from '../../services/checkout.service';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'; 
+// En las importaciones del checkout-page.component.ts, agregar:
+import { Cart, CheckoutValidation, CheckoutCalculation } from '../../../../shared/types/cart.interface';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
+import { MatRadioModule } from '@angular/material/radio';
+
 
 @Component({
   selector: 'app-checkout-page',
@@ -17,7 +25,11 @@ import { Cart } from '../../../../shared/types/cart.interface';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatDividerModule
+    MatDividerModule,
+    MatInputModule,        // ← AGREGAR
+    MatFormFieldModule,    // ← AGREGAR
+    FormsModule,
+    MatRadioModule        // ← AGREGAR
   ],
   template: `
     <div class="checkout-container">
@@ -52,7 +64,21 @@ import { Cart } from '../../../../shared/types/cart.interface';
                   <img [src]="item.productData.image_url" [alt]="item.productData.title" class="item-image">
                   <div class="item-details">
                     <h3>{{ item.productData.title }}</h3>
-                    <p>Cantidad: {{ item.quantity }}</p>
+
+                    <div class="quantity-section">
+                      <mat-form-field appearance="outline" class="quantity-field">
+                        <mat-label>Cantidad</mat-label>
+                        <input 
+                          matInput 
+                          type="number" 
+                          min="1" 
+                          max="99"
+                          [value]="item.quantity"
+                          (blur)="updateQuantity(item.listing_id, $event)"
+                          (keyup.enter)="updateQuantity(item.listing_id, $event)">
+                      </mat-form-field>
+                    </div>
+
                     <p class="item-price">$ {{ item.productData.price * item.quantity | number:'1.2-2' }}</p>
                   </div>
                   <button mat-icon-button (click)="removeItem(item.listing_id)" color="warn">
@@ -65,15 +91,27 @@ import { Cart } from '../../../../shared/types/cart.interface';
               <div class="cart-totals">
                 <div class="total-line">
                   <span>Subtotal:</span>
-                  <span>$ {{ getTotalPrice() | number:'1.2-2' }}</span>
+                  <span>$ {{ getSubTotalPrice() | number:'1.2-2' }}</span>
                 </div>
-                <div class="total-line">
-                  <span>Envío:</span>
-                  <span>A calcular</span>
-                </div>
+
+              <!-- Métodos de envío -->
+              <div class="shipping-methods">
+                <h4>Método de entrega:</h4>
+                @if (cart()?.items && cart()!.items.length > 0) {
+                  @for (method of cart()!.items[0].productData.delivery_methods; track method.id) {
+                    <mat-radio-button 
+                      [value]="method.id" 
+                      (change)="onShippingMethodChange(method.id)">
+                      {{ method.name }} - $ {{ method.cost }} 
+                      <small>{{ method.description }}</small>
+                    </mat-radio-button>
+                  }
+                }
+              </div>
+
                 <div class="total-line total-final">
                   <span><strong>Total:</strong></span>
-                  <span><strong>$ {{ getTotalPrice() | number:'1.2-2' }}</strong></span>
+                  <span><strong>$ {{ totals()?.total | number:'1.2-2' }}</strong></span>
                 </div>
               </div>
             </mat-card-content>
@@ -187,6 +225,40 @@ import { Cart } from '../../../../shared/types/cart.interface';
       margin-bottom: 0.5rem;
     }
     
+    .validation-errors {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+      background-color: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    
+    .error-message {
+      color: #856404;
+      margin: 0.25rem 0;
+    }
+    
+    .item-error {
+      color: #d32f2f !important;
+      font-size: 0.875rem;
+      margin: 0.25rem 0;
+    }
+    
+    .calculating {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      justify-content: center;
+      padding: 1rem;
+    }
+    
+    .discount {
+      color: #2e7d32;
+    }
+    
     .total-final {
       margin-top: 1rem;
       padding-top: 1rem;
@@ -215,19 +287,65 @@ import { Cart } from '../../../../shared/types/cart.interface';
 export class CheckoutPageComponent implements OnInit {
   private cartService = inject(CartService);
   private router = inject(Router);
-  
+  private checkoutService = inject(CheckoutService);
+  private snackBar = inject(MatSnackBar);
+
+  // Estados de validación - AGREGAR AL INICIO DE LA CLASE
+  validating = signal(false);
+  calculating = signal(false);
+  validationErrors = signal<any[]>([]);
+  totals = signal<CheckoutCalculation | null>(null);
+  selectedShippingMethod = signal<string | null>(null);
+    
   cart = this.cartService.cart;
   
   ngOnInit() {
     console.log('🛒 Checkout cargado, carrito:', this.cart());
+
+    if (this.cart()) {
+      this.validateCartWithBackend();
+      this.calculateTotalsWithBackend();
+    }
   }
+
+  onShippingMethodChange(methodId: string) {
+    console.log('🔄 Método de envío seleccionado:', methodId);
+    this.selectedShippingMethod.set(methodId);
+    this.calculateTotalsWithBackend();
+  }
+
+    /**
+   * Actualizar cantidad de un item
+   */
+  updateQuantity(listing_id: string, event: any) {
+    const newQuantity = parseInt(event.target.value);
+    
+    if (isNaN(newQuantity) || newQuantity < 1) {
+      event.target.value = 1;
+      return;
+    }
+    
+    console.log(`🔄 Actualizando cantidad de ${listing_id} a ${newQuantity}`);
+    
+    // Actualizar en el carrito
+    this.cartService.updateQuantity(listing_id, newQuantity);
+    
+    // Re-validar automáticamente después de 300ms
+    setTimeout(() => {
+      if (this.cart()) {
+        this.validateCartWithBackend();
+        this.calculateTotalsWithBackend();
+      }
+    }, 300);
+  }
+
   
   removeItem(listing_id: string) {
     this.cartService.removeItem(listing_id);
   }
   
-  getTotalPrice(): number {
-    return this.cartService.getTotalPrice();
+  getSubTotalPrice(): number {
+    return this.cartService.getSubTotalPrice();
   }
   
   goToProducts() {
@@ -238,5 +356,70 @@ export class CheckoutPageComponent implements OnInit {
     // Próxima implementación
     console.log('💳 Proceder al pago');
     alert('Funcionalidad de pago - próxima implementación');
+  }
+
+  /**
+ * Validar carrito con backend
+ */
+  validateCartWithBackend() {
+    const cart = this.cart();
+    if (!cart) return;
+    
+    this.validating.set(true);
+    this.validationErrors.set([]);
+    
+    const request = {
+      items: this.checkoutService.cartItemsToBackendFormat(cart.items),
+      seller_id: cart.seller_id
+    };
+    
+    this.checkoutService.validateCheckout(request).subscribe({
+      next: (validation) => {
+        this.validating.set(false);
+        
+        if (!validation.valid) {
+          this.validationErrors.set(validation.errors);
+          this.snackBar.open('⚠️ Se encontraron problemas en tu carrito', 'Cerrar', { duration: 4000 });
+          console.log('❌ Carrito no válido');
+        } else {
+          console.log('✅ Carrito validado correctamente');
+        }
+      },
+      error: (err) => {
+        this.validating.set(false);
+        console.error('❌ Error validando carrito:', err);
+        this.snackBar.open('❌ Error validando productos', 'Cerrar', { duration: 3000 });
+      }
+    });
+  }
+
+  /**
+ * Calcular totales con backend
+ */
+  calculateTotalsWithBackend() {
+    const cart = this.cart();
+    if (!cart) return;
+    
+    this.calculating.set(true);
+    
+    const request = {
+      items: this.checkoutService.cartItemsToBackendFormat(cart.items),
+      seller_id: cart.seller_id,
+      delivery_method_id: this.selectedShippingMethod() || 'pickup'
+      // shipping_method: 'delivery' // Por ahora fijo, después dinámico
+    };
+    
+    this.checkoutService.calculateTotals(request).subscribe({
+      next: (totals) => {
+        this.calculating.set(false);
+        this.totals.set(totals);
+        console.log('✅ Totales calculados:', totals);
+      },
+      error: (err) => {
+        this.calculating.set(false);
+        console.error('❌ Error calculando totales:', err);
+        this.snackBar.open('❌ Error calculando totales', 'Cerrar', { duration: 3000 });
+      }
+    });
   }
 }

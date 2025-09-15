@@ -67,6 +67,8 @@ export class ProductsService {
   return this.apiService.get<any>(`communities/550e8400-e29b-41d4-a716-446655440001/listings/${id}`)
     .pipe(
       map((response: any) => {
+        console.log('🔍 Backend response delivery_methods:', response.delivery_methods); 
+        
         // Mapear la nueva estructura
         return {
           id: response.id,
@@ -79,6 +81,7 @@ export class ProductsService {
           max_quantity: response.max_quantity_per_order,
           category: response.category?.name,
           advertiser: response.advertiser?.name,
+          advertiser_id: response.advertiser?.id,
           created_at: response.created_at,
           updated_at: response.updated_at,
           // Imagen principal

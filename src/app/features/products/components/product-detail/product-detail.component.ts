@@ -323,7 +323,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     event.target.src = 'https://via.placeholder.com/500x400/e0e0e0/757575?text=Imagen+no+disponible';
   }
 
-    increaseQuantity() {
+  increaseQuantity() {
     const current = this.selectedQuantity();
     const max = this.getMaxQuantity();
     if (current < max) {
@@ -360,6 +360,10 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   addToCart() {
     const product = this.product();
     const quantity = this.selectedQuantity();
+
+    if(product)
+      console.log('🔍 Product delivery_methods antes de addItem:', product.delivery_methods);
+    
     
     if (!product) {
       this.snackBar.open('❌ Error: Producto no disponible', 'Cerrar', { duration: 3000 });
@@ -374,9 +378,10 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       {
         title: product.title,
         price: product.price,
-        image_url: product.image_url || product.image
+        image_url: product.image_url || product.image,
+        delivery_methods: product.delivery_methods
       },
-      product.advertiser ?? '' // Asumiendo que viene el seller_id del producto, fallback a string vacío
+      product.advertiser_id ?? '' // Asumiendo que viene el seller_id del producto, fallback a string vacío
     );
 
     if (success) {
@@ -426,9 +431,10 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       {
         title: product.title,
         price: product.price,
-        image_url: product.image_url || product.image
+        image_url: product.image_url || product.image,
+        delivery_methods: product.delivery_methods
       },
-      product.advertiser ?? '' // seller_id, fallback a string vacío
+      product.advertiser_id ?? '' // seller_id, fallback a string vacío
     );
 
     if (success) {
@@ -444,7 +450,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
    */
   getCartInfo() {
     const totalItems = this.cartService.getTotalItems();
-    const totalPrice = this.cartService.getTotalPrice();
+    const totalPrice = this.cartService.getSubTotalPrice();
     return { totalItems, totalPrice };
   }
   

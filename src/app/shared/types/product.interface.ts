@@ -12,6 +12,7 @@ export interface Product {
   max_quantity?: number; // agregar
   category?: string; // agregar
   advertiser?: string; // agregar
+  advertiser_id?: string; // mantener para compatibilidad
   status?: string;
   created_at: string;
   updated_at?: string; // agregar

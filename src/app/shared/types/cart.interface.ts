@@ -1,3 +1,5 @@
+import { DeliveryMethod } from "./product.interface";
+
 // src/app/shared/types/cart.interface.ts
 export interface CartItem {
   listing_id: string;
@@ -7,6 +9,7 @@ export interface CartItem {
     title: string;
     price: number;
     image_url: string;
+    delivery_methods?: any[];
   };
 }
 

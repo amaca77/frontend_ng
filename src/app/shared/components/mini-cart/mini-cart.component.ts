@@ -53,13 +53,13 @@ export class MiniCartComponent {
     return this.cartService.getTotalItems();
   }
   
-  getTotalPrice(): number {
-    return this.cartService.getTotalPrice();
+  getSubTotalPrice(): number {
+    return this.cartService.getSubTotalPrice();
   }
   
   getTooltipText(): string {
     const items = this.getTotalItems();
-    const price = this.getTotalPrice();
+    const price = this.getSubTotalPrice();
     
     if (items === 0) {
       return 'Carrito vacío';
