@@ -1,5 +1,17 @@
 import { DeliveryMethod } from "./product.interface";
 
+export interface CheckoutFormData {
+  delivery_address: string;
+  delivery_apartment?: string;
+  delivery_postal_code?: string;
+  delivery_city?: string;
+  delivery_province?: string;
+  delivery_notes?: string;
+  customer_name?: string;
+  customer_email: string;
+  customer_phone?: string;
+}
+
 // src/app/shared/types/cart.interface.ts
 export interface CartItem {
   listing_id: string;

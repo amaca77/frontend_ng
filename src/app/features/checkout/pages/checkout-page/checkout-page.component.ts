@@ -15,7 +15,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatRadioModule } from '@angular/material/radio';
-
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { AuthService } from '../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-checkout-page',
@@ -29,7 +30,9 @@ import { MatRadioModule } from '@angular/material/radio';
     MatInputModule,        // ← AGREGAR
     MatFormFieldModule,    // ← AGREGAR
     FormsModule,
-    MatRadioModule        // ← AGREGAR
+    MatRadioModule,
+    ReactiveFormsModule
+         
   ],
   template: `
     <div class="checkout-container">
@@ -120,24 +123,79 @@ import { MatRadioModule } from '@angular/material/radio';
           <!-- Formulario de checkout (próximo paso) -->
           <mat-card class="checkout-form">
             <mat-card-header>
-              <mat-card-title>Datos de entrega</mat-card-title>
+              <mat-card-title>Datos de la compra</mat-card-title>
             </mat-card-header>
             
-            <mat-card-content>
-              <p><em>Formulario de checkout - próxima implementación</em></p>
+          <mat-card-content>
+            <form [formGroup]="checkoutForm" class="checkout-form-grid">
               
-              <div class="action-buttons">
-                <button mat-button (click)="goToProducts()">
-                  <mat-icon>arrow_back</mat-icon>
-                  Seguir Comprando
-                </button>
-                
-                <button mat-raised-button color="primary" (click)="proceedToPayment()">
-                  <mat-icon>payment</mat-icon>
-                  Continuar al Pago
-                </button>
-              </div>
-            </mat-card-content>
+              <!-- Datos del cliente -->
+              <mat-form-field appearance="outline">
+                <mat-label>Nombre completo</mat-label>
+                <input matInput formControlName="customer_name">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="customer_email" readonly>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Teléfono</mat-label>
+                <input matInput formControlName="customer_phone">
+              </mat-form-field>
+              
+              <!-- Dirección de entrega -->
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Dirección de entrega</mat-label>
+                <input matInput formControlName="delivery_address">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Depto/Piso</mat-label>
+                <input matInput formControlName="delivery_apartment">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Código postal</mat-label>
+                <input matInput formControlName="delivery_postal_code">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Ciudad</mat-label>
+                <input matInput formControlName="delivery_city">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Provincia</mat-label>
+                <input matInput formControlName="delivery_province">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Notas adicionales</mat-label>
+                <textarea matInput formControlName="delivery_notes" rows="3"></textarea>
+              </mat-form-field>
+              
+            </form>
+            
+            <div class="action-buttons">
+              <button mat-button (click)="goToProducts()">
+                <mat-icon>arrow_back</mat-icon>
+                Seguir Comprando
+              </button>
+              
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="proceedToPayment()"
+                [disabled]="!canProceed() || !checkoutForm.valid">
+                <mat-icon>payment</mat-icon>
+                Continuar al Pago
+              </button>
+            </div>
+          </mat-card-content>
+
+
           </mat-card>
         </div>
       }
@@ -282,6 +340,16 @@ import { MatRadioModule } from '@angular/material/radio';
         gap: 1rem;
       }
     }
+    .checkout-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
   `]
 })
 export class CheckoutPageComponent implements OnInit {
@@ -289,6 +357,8 @@ export class CheckoutPageComponent implements OnInit {
   private router = inject(Router);
   private checkoutService = inject(CheckoutService);
   private snackBar = inject(MatSnackBar);
+  private authService = inject(AuthService);
+  private fb = inject(FormBuilder);
 
   // Estados de validación - AGREGAR AL INICIO DE LA CLASE
   validating = signal(false);
@@ -298,6 +368,18 @@ export class CheckoutPageComponent implements OnInit {
   selectedShippingMethod = signal<string | null>(null);
     
   cart = this.cartService.cart;
+
+  checkoutForm = this.fb.group({
+    delivery_address: ['', Validators.required],
+    delivery_apartment: [''],
+    delivery_postal_code: [''],
+    delivery_city: ['', Validators.required],
+    delivery_province: ['', Validators.required],
+    delivery_notes: [''],
+    customer_name: ['', Validators.required],
+    customer_email: [{value: '', disabled: true}],
+    customer_phone: ['', Validators.required]
+  });
   
   ngOnInit() {
     console.log('🛒 Checkout cargado, carrito:', this.cart());
@@ -305,6 +387,11 @@ export class CheckoutPageComponent implements OnInit {
     if (this.cart()) {
       this.validateCartWithBackend();
       this.calculateTotalsWithBackend();
+    }
+
+    const userEmail = this.authService.getUserInfo()?.email;
+    if (userEmail) {
+      this.checkoutForm.patchValue({ customer_email: userEmail });
     }
   }
 
@@ -421,5 +508,15 @@ export class CheckoutPageComponent implements OnInit {
         this.snackBar.open('❌ Error calculando totales', 'Cerrar', { duration: 3000 });
       }
     });
+  }
+
+  canProceed(): boolean {
+    const cart = this.cart();
+    return !this.validating() && 
+          !this.calculating() && 
+          this.validationErrors().length === 0 &&
+          cart !== null &&
+          cart.items.length > 0 &&
+          this.selectedShippingMethod() !== null;
   }
 }
