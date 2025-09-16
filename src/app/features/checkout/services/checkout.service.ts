@@ -86,4 +86,12 @@ export class CheckoutService {
       quantity: item.quantity
     }));
   }
+
+  /**
+ * Crear orden completa
+ */
+  createOrder(orderData: any): Observable<any> {
+    console.log('📦 Creando orden:', orderData);    
+    return this.apiService.post<any>('checkout/create-order', orderData);
+  }
 }

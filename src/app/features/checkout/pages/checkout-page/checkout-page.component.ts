@@ -440,9 +440,37 @@ export class CheckoutPageComponent implements OnInit {
   }
   
   proceedToPayment() {
-    // Próxima implementación
-    console.log('💳 Proceder al pago');
-    alert('Funcionalidad de pago - próxima implementación');
+    if (!this.canProceed() || !this.checkoutForm.valid) {
+      this.snackBar.open('⚠️ Completa todos los campos requeridos', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    const cart = this.cart();
+    if (!cart) {  // ← AGREGAR ESTA VERIFICACIÓN
+      this.snackBar.open('❌ Error: carrito vacío', 'Cerrar', { duration: 3000 });
+      return;
+    }
+    const formData = this.checkoutForm.value;
+    
+    const orderData = {
+      items: this.checkoutService.cartItemsToBackendFormat(cart.items),
+      delivery_method_id: this.selectedShippingMethod(),
+      ...formData  // Todos los campos del formulario
+    };
+    
+    console.log('💳 Creando orden:', orderData);
+    
+    this.checkoutService.createOrder(orderData).subscribe({
+      next: (response) => {
+        console.log('✅ Orden creada:', response);
+        this.snackBar.open(`✅ Orden ${response.order_id} creada exitosamente`, 'Cerrar', { duration: 5000 });
+        // TODO: Redirigir a página de confirmación
+      },
+      error: (err) => {
+        console.error('❌ Error creando orden:', err);
+        this.snackBar.open('❌ Error al crear la orden', 'Cerrar', { duration: 3000 });
+      }
+    });
   }
 
   /**
