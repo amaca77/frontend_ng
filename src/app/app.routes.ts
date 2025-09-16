@@ -28,6 +28,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/checkout/pages/checkout-page/checkout-page.component').then(c => c.CheckoutPageComponent)
   },
   { 
+    path: 'orders', 
+    loadComponent: () => import('./features/orders/pages/orders-page/orders-page.component').then(c => c.OrdersPageComponent)
+  },
+  { 
     path: '**', 
     redirectTo: '/products' 
   }

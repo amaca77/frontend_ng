@@ -30,6 +30,13 @@ import { MiniCartComponent } from './shared/components/mini-cart/mini-cart.compo
         </button>
         <span class="spacer"></span>
         <app-mini-cart></app-mini-cart>
+
+        @if (isAuthenticated) {
+          <button mat-icon-button (click)="goToOrders()" matTooltip="Mis Compras">
+            <mat-icon>receipt_long</mat-icon>
+          </button>
+        }
+
         <button mat-icon-button (click)="handleAccountClick()" 
                 [title]="isAuthenticated ? 'Cerrar sesión' : 'Iniciar sesión'">
           <mat-icon>account_circle</mat-icon>
@@ -140,5 +147,9 @@ export class AppComponent {
 
   goToLogin() {
     this.router.navigate(['/login']);
+  }
+
+  goToOrders() {
+    this.router.navigate(['/orders']);
   }
 }
