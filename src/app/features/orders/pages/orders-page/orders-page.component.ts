@@ -17,13 +17,13 @@ import { OrdersService } from '../../services/orders.service';
       @for (order of orders(); track order.id) {
         <mat-card class="order-card">
           <mat-card-header>
-            <mat-card-title>Orden #{{ order.id.slice(-8) }}</mat-card-title>
+            <mat-card-title>Orden #{{ order.id }}</mat-card-title>
             <mat-card-subtitle>{{ order.created_at | date:'short' }}</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
-            <p><strong>Estado: {{ order.status }}</strong></p>
-            
-            <p><strong>Total: $ {{ order.total }}</strong></p>
+            <br><strong>Estado: {{ order.status }}</strong></p>
+            <br><strong>Estado Payment: {{ order.payment_status }}</strong></p>
+            <br><strong>Total: $ {{ order.total }}</strong></p>
             @for (item of order.items; track item.listing_id) {
               <p>{{ item.listing_title }} x{{ item.quantity }}</p>
             }
