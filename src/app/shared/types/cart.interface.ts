@@ -8,6 +8,8 @@ export interface CheckoutFormData {
   delivery_province?: string;
   delivery_notes?: string;
   customer_name?: string;
+  customer_identification_type: string;
+  customer_identification_number: string;
   customer_email: string;
   customer_phone?: string;
 }

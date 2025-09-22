@@ -17,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 import { MatRadioModule } from '@angular/material/radio';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-checkout-page',
@@ -27,11 +28,12 @@ import { AuthService } from '../../../../core/auth/auth.service';
     MatButtonModule,
     MatIconModule,
     MatDividerModule,
-    MatInputModule,        // ← AGREGAR
-    MatFormFieldModule,    // ← AGREGAR
+    MatInputModule,        
+    MatFormFieldModule,    
     FormsModule,
     MatRadioModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatSelectModule
          
   ],
   template: `
@@ -139,6 +141,26 @@ import { AuthService } from '../../../../core/auth/auth.service';
                 <mat-label>Email</mat-label>
                 <input matInput formControlName="customer_email" readonly>
               </mat-form-field>
+
+               
+                <mat-form-field appearance="outline" class="identification-type">
+                  <mat-label>Tipo de documento</mat-label>
+                  <mat-select formControlName="customer_identification_type" required>
+                    <mat-option value="DNI_ARG">DNI</mat-option>
+                    <mat-option value="CUIT_ARG">CUIT/CUIL</mat-option>
+                  </mat-select>
+                  <mat-error>Seleccione tipo de documento</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="identification-number">
+                  <mat-label>Número de documento</mat-label>
+                  <input matInput 
+                         formControlName="customer_identification_number" 
+                         placeholder="Ej: 12.345.678 o 20-12345678-9"
+                         required>
+                  <mat-error>El número de documento es requerido</mat-error>
+                </mat-form-field>
+              
               
               <mat-form-field appearance="outline">
                 <mat-label>Teléfono</mat-label>
@@ -377,6 +399,8 @@ export class CheckoutPageComponent implements OnInit {
     delivery_province: ['', Validators.required],
     delivery_notes: [''],
     customer_name: ['', Validators.required],
+    customer_identification_type: ['DNI_ARG', Validators.required], // Default DNI
+    customer_identification_number: ['', Validators.required],
     customer_email: [{value: '', disabled: true}],
     customer_phone: ['', Validators.required]
   });
@@ -464,7 +488,8 @@ export class CheckoutPageComponent implements OnInit {
       next: (response) => {
         console.log('✅ Orden creada:', response);
         this.snackBar.open(`✅ Orden ${response.order_id} creada exitosamente`, 'Cerrar', { duration: 5000 });
-        // TODO: Redirigir a página de confirmación
+        console.log('✅ form_url:', response.payment_url);
+        window.location.href = response.payment_url;  // Redirigir a la URL de pago
       },
       error: (err) => {
         console.error('❌ Error creando orden:', err);

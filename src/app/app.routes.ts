@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthCallbackComponent } from './features/auth/pages/auth-callback/auth-callback.component';
+import { PaymentResultComponent } from './features/payment/payment-result.component';
 
 export const routes: Routes = [
   { 
@@ -30,6 +31,14 @@ export const routes: Routes = [
   { 
     path: 'orders', 
     loadComponent: () => import('./features/orders/pages/orders-page/orders-page.component').then(c => c.OrdersPageComponent)
+  },
+  {
+    path: 'payment-result',
+    component: PaymentResultComponent
+  },
+  {
+    path: 'payment-error',
+    component: PaymentResultComponent //PaymentErrorComponent
   },
   { 
     path: '**', 
