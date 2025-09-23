@@ -32,6 +32,10 @@ export const routes: Routes = [
     path: 'orders', 
     loadComponent: () => import('./features/orders/pages/orders-page/orders-page.component').then(c => c.OrdersPageComponent)
   },
+  { 
+    path: 'my-listings', 
+    loadComponent: () => import('./features/listings/pages/my-listings-page/my-listings-page.component').then(c => c.MyListingsPageComponent)
+  },
   {
     path: 'payment-result',
     component: PaymentResultComponent

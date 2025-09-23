@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from './core/auth/auth.service';
 import { MiniCartComponent } from './shared/components/mini-cart/mini-cart.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 
 @Component({
@@ -18,6 +19,7 @@ import { MiniCartComponent } from './shared/components/mini-cart/mini-cart.compo
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
+    MatTooltipModule,
     MiniCartComponent
   ],
   template: `
@@ -34,6 +36,11 @@ import { MiniCartComponent } from './shared/components/mini-cart/mini-cart.compo
         @if (isAuthenticated) {
           <button mat-icon-button (click)="goToOrders()" matTooltip="Mis Compras">
             <mat-icon>receipt_long</mat-icon>
+          </button>
+        }
+        @if (isAuthenticated && hasAdvertiserRole()) {
+          <button mat-icon-button (click)="goToMyListings()" matTooltip="Mis Publicaciones">
+            <mat-icon>store</mat-icon>
           </button>
         }
 
@@ -151,5 +158,13 @@ export class AppComponent {
 
   goToOrders() {
     this.router.navigate(['/orders']);
+  }
+
+  hasAdvertiserRole(): boolean {
+    return this.authService.getUserRoles().includes('advertiser');
+  }
+
+  goToMyListings(): void {
+    this.router.navigate(['/my-listings']);
   }
 }
