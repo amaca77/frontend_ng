@@ -21,9 +21,9 @@ import { OrdersService } from '../../services/orders.service';
             <mat-card-subtitle>{{ order.created_at | date:'short' }}</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
-            <br><strong>Estado: {{ order.status }}</strong></p>
-            <br><strong>Estado Payment: {{ order.payment_status }}</strong></p>
-            <br><strong>Total: $ {{ order.total }}</strong></p>
+            <br><strong>Estado: {{ order.status }}</strong>
+            <br><strong>Estado Payment: {{ order.payment_status }}</strong>
+            <br><strong>Total: $ {{ order.total }}</strong>
             @for (item of order.items; track item.listing_id) {
               <p>{{ item.listing_title }} x{{ item.quantity }}</p>
             }
