@@ -142,6 +142,10 @@ import { MatPaginatorModule } from '@angular/material/paginator';
                 </button>
                 
                 <mat-menu #moreMenu="matMenu">
+                    <button mat-menu-item (click)="addListingStock(listing.id)">
+                        <mat-icon>add_box</mat-icon>
+                        <span>Agregar Stock</span>
+                    </button>
                     <button mat-menu-item (click)="updateListingStock(listing.id)">
                     <mat-icon>inventory</mat-icon>
                     <span>Actualizar Stock</span>
@@ -416,30 +420,66 @@ export class MyListingsPageComponent implements OnInit, OnDestroy {
     console.log('Editar publicación:', id);
   }
   
-  toggleListingStatus(event: { id: string, active: boolean }) {
-    this.myListingsService.toggleListingStatus(event.id, event.active)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (updatedListing) => {
-          // Actualizar la lista local
-          const updatedListings = this.listings().map(listing => 
-            listing.id === event.id ? updatedListing : listing
-          );
-          this.listings.set(updatedListings);
-          
-          const statusText = event.active ? 'activada' : 'desactivada';
-          this.snackBar.open(`Publicación ${statusText}`, 'Cerrar', {
-            duration: 2000
-          });
-        },
-        error: (error) => {
-          console.error('Error cambiando estado:', error);
-          this.snackBar.open('Error al cambiar estado', 'Cerrar', {
-            duration: 3000
-          });
-        }
-      });
-  }
+    toggleListingStatus(event: { id: string, active: boolean }) {
+        this.myListingsService.toggleListingStatus(event.id, event.active)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (response) => {
+                    // ✅ Actualizar estado local
+                    const updatedListings = this.listings().map(listing => 
+                        listing.id === event.id 
+                            ? { ...listing, status: (event.active ? 'active' : 'inactive') as 'active' | 'inactive' | 'draft' }
+                            : listing
+                        );
+                    this.listings.set(updatedListings);
+                    
+                    const statusText = event.active ? 'activada' : 'desactivada';
+                    this.snackBar.open(`Publicación ${statusText}`, 'Cerrar', {
+                    duration: 2000
+                    });
+                },
+            error: (error) => {
+                console.error('Error cambiando estado:', error);
+                this.snackBar.open('Error al cambiar estado', 'Cerrar', {
+                duration: 3000
+                });
+            }
+            });
+    }
+
+  addListingStock(id: string) {
+    const quantity = prompt('Cantidad a agregar al stock:');
+    
+    if (quantity && !isNaN(Number(quantity)) && Number(quantity) > 0) {
+        this.myListingsService.addStock(id, Number(quantity))
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+            next: (response) => {
+                // ✅ Actualizar stock local sumando la cantidad
+                const updatedListings = this.listings().map(listing => 
+                    listing.id === id 
+                    ? { ...listing, stock: listing.stock + Number(quantity) }
+                    : listing
+                );
+                this.listings.set(updatedListings);
+                
+                this.snackBar.open(`+${quantity} agregado al stock`, 'Cerrar', {
+                    duration: 2000
+                });
+            },
+            error: (error) => {
+                console.error('Error agregando stock:', error);
+                this.snackBar.open('Error al agregar stock', 'Cerrar', {
+                    duration: 3000
+                });
+            }
+        });
+    } else if (quantity !== null) {
+        this.snackBar.open('Ingresa una cantidad válida mayor a 0', 'Cerrar', {
+        duration: 2000
+        });
+    }
+    }
   
   updateListingStock(id: string) {
     const listing = this.listings().find(l => l.id === id);
@@ -449,12 +489,14 @@ export class MyListingsPageComponent implements OnInit, OnDestroy {
       this.myListingsService.updateStock(id, Number(newStock))
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (updatedListing) => {
-            // Actualizar la lista local
-            const updatedListings = this.listings().map(listing => 
-              listing.id === id ? updatedListing : listing
-            );
-            this.listings.set(updatedListings);
+            next: (response) => {
+                // ✅ Solo actualizar el campo stock, mantener resto del objeto
+                const updatedListings = this.listings().map(listing => 
+                    listing.id === id 
+                    ? { ...listing, stock: Number(newStock) }  // Mantener todo, solo cambiar stock
+                    : listing
+                );
+                this.listings.set(updatedListings);
             
             this.snackBar.open(`Stock actualizado a ${newStock}`, 'Cerrar', {
               duration: 2000

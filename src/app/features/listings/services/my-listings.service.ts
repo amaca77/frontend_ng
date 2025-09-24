@@ -133,38 +133,56 @@ export class MyListingsService {
   /**
    * Cambiar estado de publicación (activar/desactivar)
    */
-  toggleListingStatus(id: string, active: boolean): Observable<MyListing> {
-    return this.apiService.put<any>(`listings/${id}/status/`, { 
-      is_active: active 
-    }).pipe(
-      map(this.mapBackendToFrontend),
-      tap(() => {
-        console.log(`✅ Publicación ${active ? 'activada' : 'desactivada'}`);
-      }),
-      catchError((error) => {
-        console.error('Error toggling listing status:', error);
-        throw error;
-      })
-    );
-  }
+    toggleListingStatus(id: string, active: boolean): Observable<any> {
+    return this.apiService.put<any>(`stock/${id}/status`, { 
+            is_active: active  // Enviar como objeto, no boolean directo
+        }).pipe(
+                tap(() => {
+                console.log(`✅ Publicación ${active ? 'activada' : 'desactivada'}`);
+            }),
+                catchError((error) => {
+                console.error('Error toggling listing status:', error);
+                throw error;
+            })
+        );
+    }
 
   /**
    * Actualizar stock de publicación
    */
-  updateStock(id: string, newStock: number): Observable<MyListing> {
-    return this.apiService.put<any>(`listings/${id}/stock/`, { 
-      stock_quantity: newStock 
-    }).pipe(
-      map(this.mapBackendToFrontend),
-      tap(() => {
-        console.log('✅ Stock actualizado exitosamente');
-      }),
-      catchError((error) => {
-        console.error('Error updating stock:', error);
-        throw error;
-      })
-    );
-  }
+    updateStock(id: string, newStock: number): Observable<any> {
+        return this.apiService.post<any>(`stock/${id}/adjust`, { 
+            new_quantity: newStock,
+            reason: "Actualización manual desde panel de advertiser"
+        }).pipe(
+            tap(() => {
+            console.log('✅ Stock actualizado exitosamente');
+            }),
+            catchError((error) => {
+            console.error('Error updating stock:', error);
+            throw error;
+            })
+        );
+    }
+
+    /**
+     * Agregar stock a publicación
+     */
+    addStock(id: string, quantity: number): Observable<any> {
+        return this.apiService.post<any>(`stock/${id}/add`, { 
+            quantity: quantity,
+            reason: "Reposición de stock desde panel de advertiser"
+        }).pipe(
+            tap(() => {
+            console.log('✅ Stock agregado exitosamente');
+            }),
+            catchError((error) => {
+            console.error('Error adding stock:', error);
+            throw error;
+            })
+        );
+    }
+
 
   /**
    * Mapear datos del backend al formato del frontend
