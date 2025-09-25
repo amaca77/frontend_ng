@@ -37,6 +37,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/listings/pages/my-listings-page/my-listings-page.component').then(c => c.MyListingsPageComponent)
   },
   {
+    path: 'my-listings/create',
+    loadComponent: () => import('./features/listings/pages/create-listing-page/create-listing-page.component')
+      .then(c => c.CreateListingPageComponent)
+  },
+  {
     path: 'payment-result',
     component: PaymentResultComponent
   },

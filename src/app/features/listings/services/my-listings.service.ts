@@ -84,22 +84,6 @@ export class MyListingsService {
     }
 
   /**
-   * Crear nueva publicación
-   */
-  createListing(listingData: Partial<MyListing>): Observable<MyListing> {
-    return this.apiService.post<any>('listings/', listingData).pipe(
-      map(this.mapBackendToFrontend),
-      tap(() => {
-        console.log('✅ Publicación creada exitosamente');
-      }),
-      catchError((error) => {
-        console.error('Error creating listing:', error);
-        throw error;
-      })
-    );
-  }
-
-  /**
    * Actualizar publicación existente
    */
   updateListing(id: string, updates: Partial<MyListing>): Observable<MyListing> {
@@ -181,6 +165,36 @@ export class MyListingsService {
             throw error;
             })
         );
+    }
+
+    /**
+     * Obtener mis métodos de entrega
+     */
+    getMyDeliveryMethods(): Observable<any[]> {
+      return this.apiService.get<any[]>('delivery-methods/my').pipe(
+        tap(() => {
+          console.log('✅ Métodos de entrega cargados');
+        }),
+        catchError((error) => {
+          console.error('Error getting delivery methods:', error);
+          throw error;
+        })
+      );
+    }
+
+    /**
+     * Crear nueva publicación
+     */
+    createListing(listingData: any): Observable<any> {
+      return this.apiService.post<any>('my-listings/', listingData).pipe(
+        tap(() => {
+          console.log('✅ Publicación creada exitosamente');
+        }),
+        catchError((error) => {
+          console.error('Error creating listing:', error);
+          throw error;
+        })
+      );
     }
 
 

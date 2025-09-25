@@ -1,4 +1,3 @@
-// src/app/features/listings/pages/my-listings-page/my-listings-page.component.ts
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -406,8 +405,7 @@ export class MyListingsPageComponent implements OnInit, OnDestroy {
   }
   
   createNewListing() {
-    // TODO: Navegar a página de creación
-    console.log('Crear nueva publicación');
+    this.router.navigate(['/my-listings/create']);
   }
   
   // Event handlers del ListingCardComponent
