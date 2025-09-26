@@ -14,6 +14,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { ImageUploadService } from '../../services/image-upload.service';
 
 @Component({
   selector: 'app-create-listing-page',
@@ -69,6 +70,42 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
                     (+$ {{ method.cost }})
                 </span>
                 </mat-checkbox>
+            </div>
+        </div>
+
+        <div class="images-section">
+            <h3>
+                <mat-icon>photo_library</mat-icon>
+                Imágenes del producto
+            </h3>
+            
+            <!-- Drag & Drop Zone -->
+            <div class="upload-zone" 
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onFileDrop($event)"
+                (click)="fileInput.click()">
+                <mat-icon>cloud_upload</mat-icon>
+                <p>Arrastra imágenes aquí o haz clic para seleccionar</p>
+                <p class="upload-hint">Máximo 5 imágenes, 2 MB cada una</p>
+                
+                <input #fileInput type="file" 
+                    accept="image/*" 
+                    multiple 
+                    style="display: none"
+                    (change)="onFileSelected($event)">
+            </div>
+            
+            <!-- Preview de imágenes -->
+            <div class="images-preview" *ngIf="tempImages().length > 0">
+                <div class="image-item" *ngFor="let img of tempImages(); let i = index">
+                <img [src]="img.temp_url" [alt]="img.filename">
+                <div class="image-actions">
+                    <button mat-icon-button (click)="removeImage(i)">
+                    <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+                </div>
             </div>
         </div>
 
@@ -217,6 +254,72 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
         font-size: 0.9em;
         color: #666;
         }
+
+        .images-section {
+        margin: 24px 0;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        }
+
+        .images-section h3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        }
+
+        .upload-zone {
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.3s;
+        }
+
+        .upload-zone:hover {
+        border-color: #3f51b5;
+        }
+
+        .upload-zone mat-icon {
+        font-size: 48px;
+        color: #666;
+        margin-bottom: 16px;
+        }
+
+        .upload-hint {
+        color: #666;
+        font-size: 0.9em;
+        margin: 8px 0 0 0;
+        }
+
+        .images-preview {
+        display: flex;
+        gap: 16px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+        }
+
+        .image-item {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        }
+
+        .image-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        }
+
+        .image-actions {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        }
     `]  
 })
 export class CreateListingPageComponent implements OnInit{
@@ -225,9 +328,11 @@ export class CreateListingPageComponent implements OnInit{
     private myListingsService = inject(MyListingsService);
     private router = inject(Router);
     private snackBar = inject(MatSnackBar);
+    private imageService = inject(ImageUploadService);
 
     categories = signal<any[]>([]);
     deliveryMethods = signal<any[]>([]);
+    tempImages = signal<any[]>([]);
 
     ngOnInit() {
         this.loadCategories();
@@ -256,27 +361,100 @@ export class CreateListingPageComponent implements OnInit{
 
     onSubmit() {
         if (this.listingForm.valid) {
-        console.log('Form data:', this.listingForm.value);
-        
-        this.myListingsService.createListing(this.listingForm.value).subscribe({
-            next: (response) => {
-            this.snackBar.open('Publicación creada exitosamente', 'Cerrar', {
-                duration: 3000
+            const formData = {
+                ...this.listingForm.value,
+                temp_image_ids: this.tempImages().map(img => img.temp_id)
+                
+            };
+
+            console.log('Form data with images:', formData);
+            
+            this.myListingsService.createListing(this.listingForm.value).subscribe({
+                next: (response) => {
+                    this.snackBar.open('Publicación creada exitosamente', 'Cerrar', {
+                        duration: 3000
+                    });
+                    this.router.navigate(['/my-listings']);
+                },
+                error: (error) => {
+                    console.error('Error creating listing:', error);
+                    this.snackBar.open('Error al crear publicación', 'Cerrar', {
+                        duration: 4000
+                    });
+                }
             });
-            this.router.navigate(['/my-listings']);
-            },
-            error: (error) => {
-            console.error('Error creating listing:', error);
-            this.snackBar.open('Error al crear publicación', 'Cerrar', {
-                duration: 4000
-            });
-            }
-        });
         }
     }
     
     onCancel() {
         this.router.navigate(['/my-listings']);
+    }
+
+    onDragOver(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    onDragLeave(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    onFileDrop(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const files = event.dataTransfer?.files;
+        if (files) {
+            this.handleFiles(Array.from(files));
+        }
+    }
+
+    onFileSelected(event: any) {
+        const files = event.target.files;
+        if (files) {
+            this.handleFiles(Array.from(files));
+        }
+    }
+
+    private handleFiles(files: File[]) {
+        files.forEach(file => {
+            if (this.tempImages().length >= 5) {
+            this.snackBar.open('Máximo 5 imágenes permitidas', 'Cerrar', { duration: 3000 });
+            return;
+            }
+            
+            this.uploadFile(file);
+        });
+    }
+
+    private uploadFile(file: File) {
+        this.imageService.uploadTempImage(file).subscribe({
+            next: (response) => {
+                // Actualizar signal
+                this.tempImages.update(images => [...images, response]);
+                
+                // Sincronizar con FormGroup
+                const currentIds = this.tempImages().map(img => img.temp_id);
+                this.listingForm.patchValue({
+                    temp_image_ids: currentIds
+                });
+            },
+            error: (error) => {
+                console.error('Error uploading image:', error);
+                this.snackBar.open('Error al subir imagen', 'Cerrar', { duration: 3000 });
+            }
+        });
+    }
+
+    removeImage(index: number) {
+        this.tempImages.update(images => images.filter((_, i) => i !== index));
+        
+        // Sincronizar con FormGroup
+        const currentIds = this.tempImages().map(img => img.temp_id);
+        this.listingForm.patchValue({
+            temp_image_ids: currentIds
+    });
     }
 
 
@@ -315,17 +493,18 @@ export class CreateListingPageComponent implements OnInit{
     }
   
     listingForm: FormGroup = this.fb.group({
-    type: ['product', [Validators.required]],
-    title: ['', [Validators.required, Validators.maxLength(100)]],
-    short_description: ['', [Validators.required, Validators.maxLength(200)]],
-    long_description: [''],
-    price: [0, [Validators.required, Validators.min(0.01)]],
-    list_price: [null],
-    stock_quantity: [0, [Validators.required, Validators.min(0)]],
-    max_quantity_per_order: [1, [Validators.required, Validators.min(1)]],
-    category_id: ['', [Validators.required]],
-    delivery_method_ids: [[]],
-    is_active: [false],
-    is_featured: [false]
+        type: ['product', [Validators.required]],
+        title: ['', [Validators.required, Validators.maxLength(100)]],
+        short_description: ['', [Validators.required, Validators.maxLength(200)]],
+        long_description: [''],
+        price: [0, [Validators.required, Validators.min(0.01)]],
+        list_price: [null],
+        stock_quantity: [0, [Validators.required, Validators.min(0)]],
+        max_quantity_per_order: [1, [Validators.required, Validators.min(1)]],
+        category_id: ['', [Validators.required]],
+        delivery_method_ids: [[]],
+        is_active: [false],
+        is_featured: [false],
+        temp_image_ids: [[]] 
     });
 }
