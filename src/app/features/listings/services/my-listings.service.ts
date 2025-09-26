@@ -103,7 +103,7 @@ export class MyListingsService {
    * Eliminar publicación
    */
   deleteListing(id: string): Observable<void> {
-    return this.apiService.delete<void>(`listings/${id}/`).pipe(
+    return this.apiService.delete<void>(`my-listings/${id}/`).pipe(
       tap(() => {
         console.log('✅ Publicación eliminada exitosamente');
       }),
