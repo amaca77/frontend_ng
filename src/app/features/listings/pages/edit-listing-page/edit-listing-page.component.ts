@@ -337,6 +337,7 @@ export class EditListingPageComponent implements OnInit{
     tempImages = signal<any[]>([]);
     listingId: string | null = null;
     isEditMode = true; 
+    originalImages: string[] = [];
 
     ngOnInit() {
         this.listingId = this.route.snapshot.paramMap.get('id');
@@ -388,14 +389,24 @@ export class EditListingPageComponent implements OnInit{
                 ...this.listingForm.value,
                 temp_image_ids: this.tempImages().map(img => img.temp_id)                
             };
+            const originalImageIds = this.originalImages || [];
+
+            // Imágenes actuales que son existentes
+            const currentExistingIds = this.tempImages()
+                .filter(img => img.is_existing)
+                .map(img => img.temp_id);
+
+             // IDs de imágenes a eliminar
+            const imagesToDelete = originalImageIds.filter(id => !currentExistingIds.includes(id));
 
             // Solo enviar IDs de imágenes nuevas (sin is_existing)
             const newImageIds = this.tempImages()
-            .filter(img => !img.is_existing)
-            .map(img => img.temp_id);
+                .filter(img => !img.is_existing)
+                .map(img => img.temp_id);
 
             this.listingForm.patchValue({
-                temp_image_ids: newImageIds
+                temp_image_ids: newImageIds,
+                delete_image_ids: imagesToDelete
             });
             console.log('Form data with images:', formData);
             
