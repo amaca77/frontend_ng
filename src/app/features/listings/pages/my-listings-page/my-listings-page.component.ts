@@ -414,8 +414,8 @@ export class MyListingsPageComponent implements OnInit, OnDestroy {
   }
   
   editListing(id: string) {
-    // TODO: Navegar a página de edición
     console.log('Editar publicación:', id);
+    this.router.navigate(['/my-listings', id, 'edit']);    
   }
   
     toggleListingStatus(event: { id: string, active: boolean }) {

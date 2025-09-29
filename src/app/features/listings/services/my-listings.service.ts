@@ -87,7 +87,7 @@ export class MyListingsService {
    * Actualizar publicación existente
    */
   updateListing(id: string, updates: Partial<MyListing>): Observable<MyListing> {
-    return this.apiService.put<any>(`listings/${id}/`, updates).pipe(
+    return this.apiService.put<any>(`my-listings/${id}/`, updates).pipe(
       map(this.mapBackendToFrontend),
       tap(() => {
         console.log('✅ Publicación actualizada exitosamente');
@@ -113,6 +113,23 @@ export class MyListingsService {
       })
     );
   }
+
+  /**
+ * Obtener detalle de una publicación
+ */
+  getListing(id: string): Observable<any> {
+    return this.apiService.get<any>(`my-listings/${id}`).pipe(
+      tap(() => {
+        console.log('✅ Listing cargado');
+      }),
+      catchError((error) => {
+        console.error('Error getting listing:', error);
+        throw error;
+      })
+    );
+  }
+
+
 
   /**
    * Cambiar estado de publicación (activar/desactivar)

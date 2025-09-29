@@ -42,6 +42,11 @@ export const routes: Routes = [
       .then(c => c.CreateListingPageComponent)
   },
   {
+    path: 'my-listings/:id/edit',
+    loadComponent: () => import('./features/listings/pages/edit-listing-page/edit-listing-page.component')
+      .then(c => c.EditListingPageComponent)
+  },
+  {
     path: 'payment-result',
     component: PaymentResultComponent
   },
