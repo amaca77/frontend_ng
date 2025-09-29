@@ -385,32 +385,31 @@ export class EditListingPageComponent implements OnInit{
 
     onSubmit() {
         if (this.listingForm.valid && this.listingId) {
-            const formData = {
-                ...this.listingForm.value,
-                temp_image_ids: this.tempImages().map(img => img.temp_id)                
-            };
             const originalImageIds = this.originalImages || [];
-
+            
             // Imágenes actuales que son existentes
             const currentExistingIds = this.tempImages()
                 .filter(img => img.is_existing)
                 .map(img => img.temp_id);
-
-             // IDs de imágenes a eliminar
+            
+            // IDs de imágenes a eliminar
             const imagesToDelete = originalImageIds.filter(id => !currentExistingIds.includes(id));
-
-            // Solo enviar IDs de imágenes nuevas (sin is_existing)
+            
+            // Solo imágenes nuevas
             const newImageIds = this.tempImages()
                 .filter(img => !img.is_existing)
                 .map(img => img.temp_id);
-
-            this.listingForm.patchValue({
+            
+            // Crear objeto con todo
+            const formData = {
+                ...this.listingForm.value,
                 temp_image_ids: newImageIds,
                 delete_image_ids: imagesToDelete
-            });
-            console.log('Form data with images:', formData);
+            };
             
-            this.myListingsService.updateListing(this.listingId, this.listingForm.value).subscribe({
+            console.log('📤 Enviando formData:', formData);
+            
+            this.myListingsService.updateListing(this.listingId, formData).subscribe({  // ← Usar formData
             next: (response) => {
                 this.snackBar.open('Publicación actualizada exitosamente', 'Cerrar', { duration: 3000 });
                 this.router.navigate(['/my-listings']);
