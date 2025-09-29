@@ -560,6 +560,7 @@ export class EditListingPageComponent implements OnInit{
             }));
         
             this.tempImages.set(existingImages);
+            this.originalImages = listing.images.map((img: any) => img.id);  // ← Guardar IDs originales
         }
 
     }
