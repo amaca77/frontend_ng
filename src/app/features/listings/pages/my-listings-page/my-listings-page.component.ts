@@ -432,7 +432,7 @@ export class MyListingsPageComponent implements OnInit, OnDestroy {
                     // ✅ Actualizar estado local
                     const updatedListings = this.listings().map(listing => 
                         listing.id === event.id 
-                            ? { ...listing, status: (event.active ? 'active' : 'inactive') as 'active' | 'inactive' | 'draft' }
+                            ? { ...listing, status: (event.active ? 'active' : 'inactive') as 'active' | 'inactive'}
                             : listing
                         );
                     this.listings.set(updatedListings);
