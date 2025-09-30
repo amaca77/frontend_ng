@@ -10,7 +10,8 @@ export interface MyListing {
   price: number;
   list_price?: number;
   stock: number;
-  status: 'active' | 'inactive' | 'draft';
+  total_sold?: number;
+  status: 'active' | 'inactive';
   image_url?: string;
   created_at: string;
   updated_at: string;
@@ -226,6 +227,7 @@ export class MyListingsService {
       price: parseFloat(item.price),
       list_price: item.list_price ? parseFloat(item.list_price) : undefined,
       stock: item.stock_quantity || 0,
+      total_sold: item.total_sold || 0,
       status: item.is_active ? 'active' : 'inactive',
       image_url: item.primary_image?.image_url,
       created_at: item.created_at,

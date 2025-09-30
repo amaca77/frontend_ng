@@ -58,7 +58,7 @@ import { MatDividerModule } from '@angular/material/divider';
             <mat-icon>inventory</mat-icon>
             <span>Stock: {{ listing.stock }}</span>
           </div>
-          
+                  
           @if (listing.category) {
             <div class="detail-item">
               <mat-icon>category</mat-icon>
@@ -316,8 +316,6 @@ export class ListingCardComponent {
         return 'check_circle';
       case 'inactive':
         return 'visibility_off';
-      case 'draft':
-        return 'edit';
       default:
         return 'help';
     }

@@ -111,6 +111,12 @@ import { MatPaginatorModule } from '@angular/material/paginator';
             <mat-cell *matCellDef="let listing">{{ listing.stock }}</mat-cell>
             </ng-container>
 
+            <!-- Columna Vendidos -->
+            <ng-container matColumnDef="sold">
+              <mat-header-cell *matHeaderCellDef>Vendidos</mat-header-cell>
+              <mat-cell *matCellDef="let listing">{{ listing.total_sold || 0 }}</mat-cell>
+            </ng-container>
+
             <!-- Columna Estado -->
             <ng-container matColumnDef="status">
             <mat-header-cell *matHeaderCellDef>Estado</mat-header-cell>
@@ -326,7 +332,7 @@ export class MyListingsPageComponent implements OnInit, OnDestroy {
   currentPage = signal(1);       // ← NUEVO
   pageSize = 10;                 // ← NUEVO
 
-  displayedColumns: string[] = ['image', 'title', 'price', 'stock', 'status', 'actions'];
+  displayedColumns: string[] = ['image', 'title', 'price', 'stock', 'sold', 'status', 'actions'];
 
   getImageUrl(listing: MyListing): string {
     if (listing.image_url) {
