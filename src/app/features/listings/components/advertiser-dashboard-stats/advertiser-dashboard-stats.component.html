@@ -1,0 +1,125 @@
+<div class="dashboard-container">
+  
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando estadísticas...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="error-container">
+    <mat-icon color="warn">error_outline</mat-icon>
+    <p>{{ error() }}</p>
+    <button mat-button (click)="refresh()">Reintentar</button>
+  </div>
+
+  <!-- Stats Grid -->
+  <div *ngIf="stats() && !loading()" class="stats-grid">
+    
+    <!-- Total Listings -->
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon primary">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3>{{ stats()!.total_listings }}</h3>
+          <p>Total Publicaciones</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Active Listings -->
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon success">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3>{{ stats()!.active_listings }}</h3>
+          <p>Activas</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Total Sales -->
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon accent">
+          <mat-icon>shopping_cart</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3>{{ stats()!.total_sales }}</h3>
+          <p>Ventas Totales</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Estimated Revenue -->
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon success">
+          <mat-icon>attach_money</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3>${{ stats()!.estimated_revenue | number:'1.0-0' }}</h3>
+          <p>Ingresos Estimados</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Total Stock -->
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon info">
+          <mat-icon>inventory</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3>{{ stats()!.total_stock }}</h3>
+          <p>Stock Total</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Inventory Value -->
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon primary">
+          <mat-icon>savings</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3>${{ stats()!.inventory_value | number:'1.0-0' }}</h3>
+          <p>Valor Inventario</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Low Stock Warning -->
+    <mat-card class="stat-card" [class.warning]="stats()!.low_stock_count > 0">
+      <mat-card-content>
+        <div class="stat-icon warning">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3>{{ stats()!.low_stock_count }}</h3>
+          <p>Stock Bajo</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Out of Stock -->
+    <mat-card class="stat-card" [class.alert]="stats()!.out_of_stock_listings > 0">
+      <mat-card-content>
+        <div class="stat-icon alert">
+          <mat-icon>remove_shopping_cart</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h3>{{ stats()!.out_of_stock_listings }}</h3>
+          <p>Sin Stock</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+</div>

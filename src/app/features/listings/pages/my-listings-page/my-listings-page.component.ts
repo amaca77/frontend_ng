@@ -17,6 +17,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { AdvertiserDashboardStatsComponent } from '../../components/advertiser-dashboard-stats/advertiser-dashboard-stats.component';
+
 
 @Component({
   selector: 'app-my-listings-page',
@@ -35,7 +37,8 @@ import { MatPaginatorModule } from '@angular/material/paginator';
     MatMenuModule,
     MatChipsModule,      
     MatTooltipModule,
-    MatPaginatorModule  
+    MatPaginatorModule,
+    AdvertiserDashboardStatsComponent
   ],
   template: `
     <div class="page-container">
@@ -49,6 +52,9 @@ import { MatPaginatorModule } from '@angular/material/paginator';
           Nueva Publicación
         </button>
       </div>
+
+      <!-- DASHBOARD STATS -->
+      <app-advertiser-dashboard-stats></app-advertiser-dashboard-stats>
 
       <div class="content">
         @if (loading()) {

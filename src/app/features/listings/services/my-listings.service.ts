@@ -18,6 +18,21 @@ export interface MyListing {
   category?: string;
 }
 
+export interface DashboardStats {
+  total_listings: number;
+  active_listings: number;
+  inactive_listings: number;
+  featured_listings: number;
+  out_of_stock_listings: number;
+  total_sales: number;
+  total_stock: number;
+  inventory_value: number;
+  estimated_revenue: number;
+  average_price: number;
+  low_stock_count: number;
+  inactive_with_stock: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -249,5 +264,34 @@ export class MyListingsService {
 
   clearError(): void {
     this.error.set(null);
+  }
+
+  /**
+ * Obtener estadísticas del dashboard del advertiser
+ */
+  getDashboardStats(): Observable<DashboardStats> {
+    return this.apiService.get<DashboardStats>('my-listings/dashboard-stats').pipe(
+      tap((stats) => {
+        console.log('✅ Dashboard stats cargadas:', stats);
+      }),
+      catchError((error) => {
+        console.error('Error getting dashboard stats:', error);
+        // Retornar stats vacías en caso de error
+        return of({
+          total_listings: 0,
+          active_listings: 0,
+          inactive_listings: 0,
+          featured_listings: 0,
+          out_of_stock_listings: 0,
+          total_sales: 0,
+          total_stock: 0,
+          inventory_value: 0,
+          estimated_revenue: 0,
+          average_price: 0,
+          low_stock_count: 0,
+          inactive_with_stock: 0
+        });
+      })
+    );
   }
 }
