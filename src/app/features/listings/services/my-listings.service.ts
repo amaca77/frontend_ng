@@ -269,10 +269,13 @@ export class MyListingsService {
   /**
  * Obtener estadísticas del dashboard del advertiser
  */
-  getDashboardStats(): Observable<DashboardStats> {
+  getDashboardStats(forceRefresh: boolean = false): Observable<DashboardStats> {
+    const params = forceRefresh ? { refresh: 'true' } : {};
+
     return this.apiService.get<DashboardStats>('my-listings/dashboard-stats').pipe(
       tap((stats) => {
-        console.log('✅ Dashboard stats cargadas:', stats);
+        const source = forceRefresh ? '(refreshed)' : '(cached)';
+        console.log(`✅ Dashboard stats cargadas ${source}:`, stats);
       }),
       catchError((error) => {
         console.error('Error getting dashboard stats:', error);

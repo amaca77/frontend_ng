@@ -1,4 +1,17 @@
 <div class="dashboard-container">
+
+  <div class="dashboard-header">
+    <h2>Resumen de Estadísticas</h2>
+    <button 
+      mat-icon-button 
+      color="primary"
+      (click)="refresh()"
+      [disabled]="loading() || refreshing()"
+      matTooltip="Actualizar estadísticas"
+      matTooltipPosition="left">
+      <mat-icon [class.spinning]="refreshing()">refresh</mat-icon>
+    </button>
+  </div>
   
   <!-- Loading State -->
   <div *ngIf="loading()" class="loading-container">
