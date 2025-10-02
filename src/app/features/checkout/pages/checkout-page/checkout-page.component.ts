@@ -169,6 +169,18 @@ import { MatSelectModule } from '@angular/material/select';
 
               <!-- Dirección de Facturación -->
               <h3 class="full-width" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Dirección de Facturación</h3>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Nombre completo</mat-label>
+                <input matInput formControlName="billing_name" required>
+                <mat-error>El nombre es requerido</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Teléfono</mat-label>
+                <input matInput formControlName="billing_phone" required>
+                <mat-error>El teléfono es requerido</mat-error>
+              </mat-form-field>
               
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Dirección de facturación</mat-label>
@@ -434,6 +446,8 @@ export class CheckoutPageComponent implements OnInit {
     customer_email: [{value: '', disabled: true}],
     customer_phone: ['', Validators.required],
     // Billing info (AGREGAR PRIMERO)
+    billing_name: ['', Validators.required],        
+    billing_phone: ['', Validators.required], 
     billing_address: ['', Validators.required],
     billing_apartment: [''],
     billing_postal_code: ['', Validators.required],
