@@ -166,7 +166,37 @@ import { MatSelectModule } from '@angular/material/select';
                 <mat-label>Teléfono</mat-label>
                 <input matInput formControlName="customer_phone">
               </mat-form-field>
+
+              <!-- Dirección de Facturación -->
+              <h3 class="full-width" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Dirección de Facturación</h3>
               
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Dirección de facturación</mat-label>
+                <input matInput formControlName="billing_address" required>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Depto/Piso</mat-label>
+                <input matInput formControlName="billing_apartment">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Código postal</mat-label>
+                <input matInput formControlName="billing_postal_code" required>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Ciudad</mat-label>
+                <input matInput formControlName="billing_city" required>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Provincia</mat-label>
+                <input matInput formControlName="billing_province" required>
+              </mat-form-field>
+
+
+              <h3 class="full-width" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Dirección de Entrega</h3>
               <!-- Dirección de entrega -->
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Dirección de entrega</mat-label>
@@ -402,7 +432,13 @@ export class CheckoutPageComponent implements OnInit {
     customer_identification_type: ['DNI_ARG', Validators.required], // Default DNI
     customer_identification_number: ['', Validators.required],
     customer_email: [{value: '', disabled: true}],
-    customer_phone: ['', Validators.required]
+    customer_phone: ['', Validators.required],
+    // Billing info (AGREGAR PRIMERO)
+    billing_address: ['', Validators.required],
+    billing_apartment: [''],
+    billing_postal_code: ['', Validators.required],
+    billing_city: ['', Validators.required],
+    billing_province: ['', Validators.required]
   });
   
   ngOnInit() {
