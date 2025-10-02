@@ -27,8 +27,8 @@ export class ProductsService {
   
   return this.apiService.get<any>('communities/550e8400-e29b-41d4-a716-446655440001/listings/featured', {
     page: 1,
-    limit: 3,
-    strategy: 'featured_first'
+    limit: 6,
+    strategy: 'pure_random'
   }).pipe(
     map((response: any) => {
       // Mapear la nueva estructura a la anterior
