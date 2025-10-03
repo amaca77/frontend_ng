@@ -434,17 +434,17 @@ export class CheckoutPageComponent implements OnInit {
   cart = this.cartService.cart;
 
   checkoutForm = this.fb.group({
-    delivery_address: ['', Validators.required],
+    delivery_address: [''],
     delivery_apartment: [''],
     delivery_postal_code: [''],
-    delivery_city: ['', Validators.required],
-    delivery_province: ['', Validators.required],
+    delivery_city: [''],
+    delivery_province: [''],
     delivery_notes: [''],
-    delivery_name: ['', Validators.required],
+    delivery_name: [''],
     customer_identification_type: ['DNI_ARG', Validators.required], // Default DNI
     customer_identification_number: ['', Validators.required],
     customer_email: [{value: '', disabled: true}],
-    delivery_phone: ['', Validators.required],
+    delivery_phone: [''],
     // Billing info (AGREGAR PRIMERO)
     billing_name: ['', Validators.required],        
     billing_phone: ['', Validators.required], 
