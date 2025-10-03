@@ -11,7 +11,8 @@ export interface CheckoutFormData {
   customer_identification_type: string;
   customer_identification_number: string;
   customer_email: string;
-  delivery_phone?: string;
+  delivery_phone_number?: string;
+  delivery_phone_area_code?: string;
 }
 
 // src/app/shared/types/cart.interface.ts

@@ -161,24 +161,24 @@ import { MatSelectModule } from '@angular/material/select';
                   <mat-error>El número de documento es requerido</mat-error>
                 </mat-form-field>
               
-              
-              <mat-form-field appearance="outline">
-                <mat-label>Teléfono</mat-label>
-                <input matInput formControlName="delivery_phone">
-              </mat-form-field>
-
               <!-- Dirección de Facturación -->
               <h3 class="full-width" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Dirección de Facturación</h3>
 
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Nombre completo</mat-label>
                 <input matInput formControlName="billing_name" required>
                 <mat-error>El nombre es requerido</mat-error>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
+                <mat-label>Cod-Area</mat-label>
+                  <input matInput formControlName="billing_phone_area_code" required>
+                <mat-error>El codigo es requerido</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
                 <mat-label>Teléfono</mat-label>
-                <input matInput formControlName="billing_phone" required>
+                  <input matInput formControlName="billing_phone_number" required>
                 <mat-error>El teléfono es requerido</mat-error>
               </mat-form-field>
               
@@ -213,6 +213,16 @@ import { MatSelectModule } from '@angular/material/select';
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Dirección de entrega</mat-label>
                 <input matInput formControlName="delivery_address">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Cod-Area</mat-label>
+                <input matInput formControlName="delivery_phone_area_code">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Teléfono</mat-label>
+                <input matInput formControlName="delivery_phone_number">
               </mat-form-field>
               
               <mat-form-field appearance="outline">
@@ -444,10 +454,12 @@ export class CheckoutPageComponent implements OnInit {
     customer_identification_type: ['DNI_ARG', Validators.required], // Default DNI
     customer_identification_number: ['', Validators.required],
     customer_email: [{value: '', disabled: true}],
-    delivery_phone: [''],
+    delivery_phone_number: [''],
+    delivery_phone_area_code: [''],
     // Billing info (AGREGAR PRIMERO)
     billing_name: ['', Validators.required],        
-    billing_phone: ['', Validators.required], 
+    billing_phone_number: ['', Validators.required], 
+    billing_phone_area_code: ['', Validators.required], 
     billing_address: ['', Validators.required],
     billing_apartment: [''],
     billing_postal_code: ['', Validators.required],
