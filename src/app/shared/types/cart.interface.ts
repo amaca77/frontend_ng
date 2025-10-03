@@ -7,11 +7,11 @@ export interface CheckoutFormData {
   delivery_city?: string;
   delivery_province?: string;
   delivery_notes?: string;
-  customer_name?: string;
+  delivery_name?: string;
   customer_identification_type: string;
   customer_identification_number: string;
   customer_email: string;
-  customer_phone?: string;
+  delivery_phone?: string;
 }
 
 // src/app/shared/types/cart.interface.ts

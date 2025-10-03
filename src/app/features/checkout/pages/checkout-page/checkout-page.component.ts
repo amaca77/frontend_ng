@@ -134,7 +134,7 @@ import { MatSelectModule } from '@angular/material/select';
               <!-- Datos del cliente -->
               <mat-form-field appearance="outline">
                 <mat-label>Nombre completo</mat-label>
-                <input matInput formControlName="customer_name">
+                <input matInput formControlName="delivery_name">
               </mat-form-field>
               
               <mat-form-field appearance="outline">
@@ -164,7 +164,7 @@ import { MatSelectModule } from '@angular/material/select';
               
               <mat-form-field appearance="outline">
                 <mat-label>Teléfono</mat-label>
-                <input matInput formControlName="customer_phone">
+                <input matInput formControlName="delivery_phone">
               </mat-form-field>
 
               <!-- Dirección de Facturación -->
@@ -440,11 +440,11 @@ export class CheckoutPageComponent implements OnInit {
     delivery_city: ['', Validators.required],
     delivery_province: ['', Validators.required],
     delivery_notes: [''],
-    customer_name: ['', Validators.required],
+    delivery_name: ['', Validators.required],
     customer_identification_type: ['DNI_ARG', Validators.required], // Default DNI
     customer_identification_number: ['', Validators.required],
     customer_email: [{value: '', disabled: true}],
-    customer_phone: ['', Validators.required],
+    delivery_phone: ['', Validators.required],
     // Billing info (AGREGAR PRIMERO)
     billing_name: ['', Validators.required],        
     billing_phone: ['', Validators.required], 
