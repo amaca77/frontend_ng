@@ -132,12 +132,7 @@ import { MatSelectModule } from '@angular/material/select';
             <form [formGroup]="checkoutForm" class="checkout-form-grid">
               
               <!-- Datos del cliente -->
-              <mat-form-field appearance="outline">
-                <mat-label>Nombre completo</mat-label>
-                <input matInput formControlName="delivery_name">
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Email</mat-label>
                 <input matInput formControlName="customer_email" readonly>
               </mat-form-field>
@@ -210,7 +205,12 @@ import { MatSelectModule } from '@angular/material/select';
 
               <h3 class="full-width" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Dirección de Entrega</h3>
               <!-- Dirección de entrega -->
-              <mat-form-field appearance="outline" class="full-width">
+              <mat-form-field appearance="outline" >
+                <mat-label>Nombre completo</mat-label>
+                <input matInput formControlName="delivery_name">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" >
                 <mat-label>Dirección de entrega</mat-label>
                 <input matInput formControlName="delivery_address">
               </mat-form-field>
